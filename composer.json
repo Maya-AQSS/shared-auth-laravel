@@ -1,0 +1,54 @@
+{
+    "name": "maya/shared-auth-laravel",
+    "description": "Shared JWT Authentication logic for MAyA Laravel microservices.",
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/Maya-AQSS/shared-auth-laravel",
+    "support": {
+        "issues": "https://github.com/Maya-AQSS/shared-auth-laravel/issues",
+        "source": "https://github.com/Maya-AQSS/shared-auth-laravel"
+    },
+    "version": "0.1.0",
+    "require": {
+        "php": "^8.4",
+        "illuminate/support": "^11.0 || ^12.0 || ^13.0",
+        "illuminate/http": "^11.0 || ^12.0 || ^13.0",
+        "illuminate/cache": "^11.0 || ^12.0 || ^13.0",
+        "lcobucci/jwt": "^5.0",
+        "phpseclib/phpseclib": "^3.0"
+    },
+    "require-dev": {
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "orchestra/testbench": "^9.0 || ^10.0",
+        "mockery/mockery": "^1.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Maya\\Auth\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "pest --colors=always",
+        "test-coverage": "pest --coverage --min=80"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Maya\\Auth\\Providers\\SharedAuthServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
