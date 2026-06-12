@@ -121,6 +121,7 @@ it('returns 401 for token with unknown kid', function () {
         public function getPublicKey(string $kid): string {
             throw new \RuntimeException("JWKS key not found for kid: {$kid}");
         }
+        public function invalidateCache(): void {}
     });
 
     $token = loadToken('jwt-valid');
@@ -202,9 +203,14 @@ it('does NOT bypass auth when dev_bypass_auth=true but env=production', function
 
 it('caches user profile in array store after successful validation', function () {
     $token = loadToken('jwt-valid');
-    jwtMiddleware()->handle(makeRequest($token), fn ($r) => response()->json(['ok']));
+    $request = makeRequest($token);
+    jwtMiddleware()->handle($request, fn ($r) => response()->json(['ok']));
 
-    expect(Cache::has('jwt_user:test-user-uuid-0001'))->toBeTrue();
+    // The key includes a claim hash: jwt_user:{userId}:{claimHash}.
+    // Verify by reading the deposited profile instead of guessing the key.
+    $jwtUser = $request->attributes->get('jwt_user');
+    expect($jwtUser)->not->toBeNull();
+    expect($jwtUser['id'])->toBe('test-user-uuid-0001');
 });
 
 it('reuses cached user profile on second request without re-parsing JWT', function () {

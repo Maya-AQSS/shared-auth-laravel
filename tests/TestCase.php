@@ -17,7 +17,11 @@ abstract class TestCase extends OrchestraTestCase
     protected function defineEnvironment($app): void
     {
         $app['config']->set('auth.jwks_url', 'http://keycloak.test/realms/maya/protocol/openid-connect/certs');
-        $app['config']->set('auth.jwt_issuer', 'https://keycloak.maya.test/realms/maya');
+        // El issuer debe coincidir con el claim `iss` de los JWT fixtures committeados
+        // (tests/Fixtures/jwt-*.txt → iss=http://keycloak.localhost/realms/maya). Si se
+        // regeneran con generate-fixtures.php (que hoy emite keycloak.maya.test),
+        // actualizar este valor a la vez.
+        $app['config']->set('auth.jwt_issuer', 'http://keycloak.localhost/realms/maya');
         $app['config']->set('auth.jwt_audience', 'maya-test-service');
         $app['config']->set('auth.jwks_cache_ttl', 3600);
         $app['config']->set('auth.dev_bypass_auth', false);
