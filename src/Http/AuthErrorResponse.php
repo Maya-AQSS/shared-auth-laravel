@@ -17,7 +17,7 @@ class AuthErrorResponse
     public static function unauthenticated(string $error = 'invalid_token'): JsonResponse
     {
         return response()->json(
-            ['error' => 'Unauthenticated'],
+            ['error' => __('shared-auth::auth.unauthenticated')],
             401,
             ['WWW-Authenticate' => sprintf('Bearer realm="api", error="%s"', $error)],
         );
@@ -29,7 +29,7 @@ class AuthErrorResponse
     public static function missingToken(): JsonResponse
     {
         return response()->json(
-            ['error' => 'Unauthenticated'],
+            ['error' => __('shared-auth::auth.unauthenticated')],
             401,
             ['WWW-Authenticate' => 'Bearer realm="api"'],
         );
@@ -37,9 +37,15 @@ class AuthErrorResponse
 
     /**
      * 403 Forbidden — authenticated but lacking required role/permission.
+     *
+     * The caller may override the message; when omitted, the localized default
+     * from the 'shared-auth' translation namespace is used.
      */
-    public static function forbidden(string $message = 'Forbidden'): JsonResponse
+    public static function forbidden(?string $message = null): JsonResponse
     {
-        return response()->json(['error' => $message], 403);
+        return response()->json(
+            ['error' => $message ?? __('shared-auth::auth.forbidden')],
+            403,
+        );
     }
 }

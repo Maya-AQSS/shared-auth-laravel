@@ -20,6 +20,12 @@ class SharedAuthServiceProvider extends ServiceProvider
     {
         // ... here we could publish configs if we extract them, but for now we expect the app to provide config('auth.jwks_url')
 
+        // Traducciones de cara al cliente (401/403) bajo el namespace 'shared-auth'.
+        // Las apps consumidoras pueden sobreescribirlas publicando lang/vendor/shared-auth.
+        $langPath = __DIR__.'/../../lang';
+        $this->loadTranslationsFrom($langPath, 'shared-auth');
+        $this->publishes([$langPath => $this->app->langPath('vendor/shared-auth')], 'shared-auth-lang');
+
         // Defensa en profundidad: aunque JwtMiddleware ya ignora el bypass fuera de
         // 'local', abortamos el arranque si DEV_BYPASS_AUTH=true se cuela en otro
         // entorno — convierte un misconfig latente en un error inmediato.

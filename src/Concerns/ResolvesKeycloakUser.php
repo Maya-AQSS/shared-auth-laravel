@@ -27,14 +27,14 @@ trait ResolvesKeycloakUser
         $jwtUser = $request->attributes->get('jwt_user');
         $sub     = $jwtUser['id'] ?? $jwtUser['sub'] ?? null;
 
-        abort_if($sub === null, 401, 'Unauthenticated');
+        abort_if($sub === null, 401, __('shared-auth::auth.unauthenticated'));
 
         /** @var class-string<Model> $modelClass */
         $modelClass = $this->keycloakUserModel
             ?? config('auth.keycloak_user_model', \App\Models\User::class);
         $user       = $modelClass::query()->where('id', $sub)->first();
 
-        abort_if($user === null, 403, 'Empleado no encontrado o inactivo en Odoo');
+        abort_if($user === null, 403, __('shared-auth::auth.user_not_found_or_inactive'));
 
         return $user;
     }

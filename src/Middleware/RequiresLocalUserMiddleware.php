@@ -28,7 +28,7 @@ class RequiresLocalUserMiddleware
     {
         if ($request->user() === null) {
             return response()->json([
-                'message' => 'User not provisioned in local database.',
+                'message' => __('shared-auth::auth.user_not_provisioned'),
                 'code'    => 'USER_NOT_PROVISIONED',
             ], 401);
         }
