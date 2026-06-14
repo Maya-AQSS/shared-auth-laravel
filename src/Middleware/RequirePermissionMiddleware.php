@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Maya\Auth\Http\AuthErrorResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -32,8 +33,11 @@ class RequirePermissionMiddleware
         $jwtUser = $request->attributes->get('jwt_user');
 
         if ($jwtUser === null) {
-            // JwtMiddleware bypassed (typically tests) — skip permission check.
-            return $next($request);
+            // Fail closed: a permission-gated route reached without an
+            // authenticated JWT user must be rejected, never passed through.
+            // JwtMiddleware must run before this middleware; tests inject a
+            // fake `jwt_user` attribute instead of relying on a bypass.
+            return AuthErrorResponse::unauthenticated();
         }
 
         $userId   = (string) ($jwtUser['id'] ?? '');
@@ -47,7 +51,9 @@ class RequirePermissionMiddleware
         });
 
         if (! $has) {
-            abort(403, "Forbidden: missing permission '{$permission}'.");
+            // Generic message: do not leak the required permission slug in the
+            // response body (prevents RBAC namespace enumeration).
+            return AuthErrorResponse::forbidden();
         }
 
         return $next($request);

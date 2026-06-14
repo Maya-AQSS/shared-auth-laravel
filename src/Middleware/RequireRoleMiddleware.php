@@ -4,6 +4,7 @@ namespace Maya\Auth\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Maya\Auth\Http\AuthErrorResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -15,8 +16,9 @@ use Symfony\Component\HttpFoundation\Response;
  *     ->middleware('role:admin,super-admin')
  *
  * `JwtMiddleware` deposita los claims en `request->attributes->jwt_user`. Si
- * ese atributo no existe (entornos de test que se saltan el JWT), se permite
- * el paso para no romper las suites.
+ * ese atributo no existe, la petición se rechaza (fail closed): JwtMiddleware
+ * debe ejecutarse antes; los tests inyectan un `jwt_user` falso en vez de
+ * depender de un bypass.
  */
 class RequireRoleMiddleware
 {
@@ -25,8 +27,9 @@ class RequireRoleMiddleware
         $jwtUser = $request->attributes->get('jwt_user');
 
         if ($jwtUser === null) {
-            // JwtMiddleware bypassed (typically tests) — skip role check.
-            return $next($request);
+            // Fail closed: never pass through a role-gated route without an
+            // authenticated JWT user.
+            return AuthErrorResponse::unauthenticated();
         }
 
         $userRoles = (array) ($jwtUser['roles'] ?? []);
@@ -37,6 +40,6 @@ class RequireRoleMiddleware
             }
         }
 
-        abort(403, 'Forbidden.');
+        return AuthErrorResponse::forbidden();
     }
 }
